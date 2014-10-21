@@ -10,175 +10,155 @@ lcdinit                                                                         
 0002 C2B1                9             clr     RW
 0004 C2B0               10             clr     RS
 0006 C2A0               11             clr     D
-0008 02006A             12             jmp     init
+0008 020056             12             jmp     init
                         13             ;jmp    main
                         14     ;--------------------------
-                        15     string:
-000B 1718191A1B         16     db 23,24,25,26,27,28,29,30,31,32
-     1C1D1E1F20
-                        17     ;--------------------------
-                        18     lcd_enable:
-0015 00                 19             nop
-0016 D2B2               20             setb    E
-                        21     rept 10
-                        22             nop
-                        23 +1  endm
-0018 00                 24 +1                  nop
-0019 00                 25 +1                  nop
-001A 00                 26 +1                  nop
-001B 00                 27 +1                  nop
-001C 00                 28 +1                  nop
-001D 00                 29 +1                  nop
-001E 00                 30 +1                  nop
-001F 00                 31 +1                  nop
-0020 00                 32 +1                  nop
-0021 00                 33 +1                  nop
-0022 C2B2               34             clr     E
-                        35     ;       call    sleep_50us
-0024 22                 36             ret
-                        37
-                        38     sleep_50us:
-0025 7818               39             mov     R0, #018h
-0027 00                 40             nop
-0028 D8FE               41             djnz    R0, $
-002A 22                 42             ret
-                        43     sleep_5ms:
-002B 7911               44             mov     R1, #011h
-002D 7891               45             mov     R0, #091h
-002F 00                 46             nop
-0030 D8FE               47             djnz    R0, $
-0032 D9F9               48             djnz    R1, $-5
-0034 00                 49             nop
-0035 22                 50             ret
-                        51
-                        52     LCD_string:
-0036 E4                 53              clr   a                 ;clear Accumulator for any previous data
-0037 93                 54              movc  a,@a+dptr         ;load the first character in accumulator
-0038 6005               55              jz    exit              ;go to exit if zero
-003A 1140               56              acall lcd_data      ;send first char
-003C A3                 57              inc   dptr              ;increment data pointer
-003D 80F7               58              sjmp  lcd_string    ;jump back to send the next character
-                        59     exit:
-003F 22                 60              ret                     ;End of routine
-                        61
-                        62     lcd_data:
-0040 C2B1               63             clr     RW
-0042 D2B0               64             setb    RS
-0044 1115               65             call    lcd_enable
-0046 1125               66             call    sleep_50us
-0048 22                 67             ret
-                        68
-                        69     lcd_cmd:
-0049 C2B1               70             clr     RW
-004B C2B0               71             clr     RS
-004D 1115               72             call    lcd_enable
-004F 1125               73             call    sleep_50us
-0051 22                 74             ret
-                        75
-                        76     lcd_clear:
-0052 75A001             77             mov     D, #00000001b   ;Bildschirm leeren
-0055 1149               78             call    lcd_cmd
-0057 22                 79             ret
-                        80
-                        81     lcd_reset_cursor:
-0058 75A002             82             mov     D, #00000010b   ;Cursor Reseten
-005B 1149               83             call    lcd_cmd
-005D 22                 84             ret
-                        85
-                        86     shift_left:
-005E 75A01C             87             mov     D, #01Ch        ;right shift
-0061 1149               88             call    lcd_cmd
-0063 22                 89             ret
-                        90
-                        91     shift_right:
-0064 75A018             92             mov     D, #018h        ;left shift
-0067 1149               93             call    lcd_cmd
-0069 22                 94             ret
-                        95
-                        96     init:
-006A 112B               97             call    sleep_5ms
-006C 75A003             98             mov     D, #00000011b   ;Soft Reset
-006F 1115               99             call    lcd_enable
-0071 112B              100             call    sleep_5ms
-0073 1115              101             call    lcd_enable
-0075 112B              102             call    sleep_5ms
-0077 1115              103             call    lcd_enable
-0079 112B              104             call    sleep_5ms
-                       105
-                       106     init2:
-                       107             ;call sleep_5ms
-007B 75A038            108             mov     D, #00111000b   ;Modus einstellen 8-bit / 2 Zeilen / 5x7 Font
-007E 1149              109             call    lcd_cmd
-                       110
-0080 75A006            111             mov     D, #00000110b   ;Modus einstellen Increment / Fester Inhalt
-0083 1149              112             call    lcd_cmd
-                       113
-0085 75A00C            114             mov     D, #00001100b   ;Modus einstellen Display An / Cursor Aus / Cursor Blinkt Nicht
-0088 1149              115             call    lcd_cmd
-                       116
-                       117
-                       118     main:
-                       119
-008A 1152              120             call lcd_clear
-008C 1158              121             call lcd_reset_cursor
-                       122
-008E 90000B            123             mov   dptr,#string  ;my_string is the label where the string is stored
-0091 1136              124             call lcd_string    ;Send string
-0093 0200D2            125             jmp hin_init
-                       126
-                       127
-                       128
-                       129     ;       mov     D, #10000000b   ;Set Address of first Cell
-                       130     ;       call    lcd_cmd
-                       131     ;       mov     D, #65          ;Print A
-                       132     ;       call    lcd_data
-0096 75A0C0            133             mov     D, #11000000b   ;Set Address of first Cell
-0099 1149              134             call    lcd_cmd
-009B 75A048            135             mov     D, #72
-009E 1140              136             call    lcd_data
-00A0 75A041            137             mov     D, #65
-00A3 1140              138             call    lcd_data
-00A5 75A04C            139             mov     D, #76
-00A8 1140              140             call    lcd_data
-00AA 75A04C            141             mov     D, #76
-00AD 1140              142             call    lcd_data
-00AF 75A04F            143             mov     D, #79
-00B2 1140              144             call    lcd_data
-00B4 75A020            145             mov     D, #32
-00B7 1140              146             call    lcd_data
-00B9 75A057            147             mov     D, #87
-00BC 1140              148             call    lcd_data
-00BE 75A045            149             mov     D, #69
-00C1 1140              150             call    lcd_data
-00C3 75A04C            151             mov     D, #76
-00C6 1140              152             call    lcd_data
-00C8 75A0AC            153             mov     D, #0ACh
-00CB 1140              154             call    lcd_data
-00CD 75A021            155             mov     D, #33
-00D0 1140              156             call    lcd_data
-                       157
-                       158     hin_init:
-00D2 7A32              159             mov     R2, #50
-                       160     hin:
-00D4 1A                161             dec     R2
-00D5 1164              162             call    shift_right
-00D7 1125              163             call    sleep_50us
-00D9 DAF9              164             djnz    R2, hin
-00DB 0200DE            165             jmp     her_init
-                       166     her_init:
-00DE 7A32              167             mov     R2, #50
-                       168     her:
-00E0 1A                169             dec     R2
-00E1 115E              170             call    shift_left
-00E3 1125              171             call    sleep_50us
-00E5 DAF9              172             djnz    R2, her
-00E7 80E9              173             jmp     hin_init
-                       174
-                       175     while:
-00E9 00                176             nop
-                       177     ;       jmp     while
-                       178
-                       179             end
+                        15     lcd_enable:
+000B 00                 16             nop
+000C D2B2               17             setb    E
+                        18     rept 10
+                        19             nop
+                        20 +1  endm
+000E 00                 21 +1                  nop
+000F 00                 22 +1                  nop
+0010 00                 23 +1                  nop
+0011 00                 24 +1                  nop
+0012 00                 25 +1                  nop
+0013 00                 26 +1                  nop
+0014 00                 27 +1                  nop
+0015 00                 28 +1                  nop
+0016 00                 29 +1                  nop
+0017 00                 30 +1                  nop
+0018 C2B2               31             clr     E
+                        32     ;       call    sleep_50us
+001A 22                 33             ret
+                        34
+                        35     sleep_50us:
+001B 7818               36             mov     R0, #018h
+001D 00                 37             nop
+001E D8FE               38             djnz    R0, $
+0020 22                 39             ret
+                        40     sleep_5ms:
+0021 7911               41             mov     R1, #011h
+0023 7891               42             mov     R0, #091h
+0025 00                 43             nop
+0026 D8FE               44             djnz    R0, $
+0028 D9F9               45             djnz    R1, $-5
+002A 00                 46             nop
+002B 22                 47             ret
+                        48
+                        49     lcd_data:
+002C C2B1               50             clr     RW
+002E D2B0               51             setb    RS
+0030 110B               52             call    lcd_enable
+0032 111B               53             call    sleep_50us
+0034 22                 54             ret
+                        55
+                        56     lcd_cmd:
+0035 C2B1               57             clr     RW
+0037 C2B0               58             clr     RS
+0039 110B               59             call    lcd_enable
+003B 111B               60             call    sleep_50us
+003D 22                 61             ret
+                        62
+                        63     lcd_clear:
+003E 75A001             64             mov     D, #00000001b   ;Bildschirm leeren
+0041 1135               65             call    lcd_cmd
+0043 22                 66             ret
+                        67
+                        68     lcd_reset_cursor:
+0044 75A002             69             mov     D, #00000010b   ;Cursor Reseten
+0047 1135               70             call    lcd_cmd
+0049 22                 71             ret
+                        72
+                        73     shift_left:
+004A 75A01C             74             mov     D, #01Ch        ;right shift
+004D 1135               75             call    lcd_cmd
+004F 22                 76             ret
+                        77
+                        78     shift_right:
+0050 75A018             79             mov     D, #018h        ;left shift
+0053 1135               80             call    lcd_cmd
+0055 22                 81             ret
+                        82
+                        83     init:
+0056 1121               84             call    sleep_5ms
+0058 75A003             85             mov     D, #00000011b   ;Soft Reset
+005B 110B               86             call    lcd_enable
+005D 1121               87             call    sleep_5ms
+005F 110B               88             call    lcd_enable
+0061 1121               89             call    sleep_5ms
+0063 110B               90             call    lcd_enable
+0065 1121               91             call    sleep_5ms
+                        92
+                        93     init2:
+                        94             ;call sleep_5ms
+0067 75A038             95             mov     D, #00111000b   ;Modus einstellen 8-bit / 2 Zeilen / 5x7 Font
+006A 1135               96             call    lcd_cmd
+                        97
+006C 75A006             98             mov     D, #00000110b   ;Modus einstellen Increment / Fester Inhalt
+006F 1135               99             call    lcd_cmd
+                       100
+0071 75A00C            101             mov     D, #00001100b   ;Modus einstellen Display An / Cursor Aus / Cursor Blinkt Nicht
+0074 1135              102             call    lcd_cmd
+                       103
+                       104
+                       105     main:
+                       106
+0076 113E              107             call lcd_clear
+0078 1144              108             call lcd_reset_cursor
+                       109
+                       110     ;       mov     D, #10000000b   ;Set Address of first Cell
+                       111     ;       call    lcd_cmd
+                       112     ;       mov     D, #65          ;Print A
+                       113     ;       call    lcd_data
+007A 75A0C0            114             mov     D, #11000000b   ;Set Address of first Cell
+007D 1135              115             call    lcd_cmd
+007F 75A048            116             mov     D, #72
+0082 112C              117             call    lcd_data
+0084 75A041            118             mov     D, #65
+0087 112C              119             call    lcd_data
+0089 75A04C            120             mov     D, #76
+008C 112C              121             call    lcd_data
+008E 75A04C            122             mov     D, #76
+0091 112C              123             call    lcd_data
+0093 75A04F            124             mov     D, #79
+0096 112C              125             call    lcd_data
+0098 75A020            126             mov     D, #32
+009B 112C              127             call    lcd_data
+009D 75A057            128             mov     D, #87
+00A0 112C              129             call    lcd_data
+00A2 75A045            130             mov     D, #69
+00A5 112C              131             call    lcd_data
+00A7 75A04C            132             mov     D, #76
+00AA 112C              133             call    lcd_data
+00AC 75A0AC            134             mov     D, #0ACh
+00AF 112C              135             call    lcd_data
+00B1 75A021            136             mov     D, #33
+00B4 112C              137             call    lcd_data
+                       138
+                       139     hin_init:
+00B6 7A32              140             mov     R2, #50
+                       141     hin:
+00B8 1A                142             dec     R2
+00B9 1150              143             call    shift_right
+00BB 111B              144             call    sleep_50us
+00BD DAF9              145             djnz    R2, hin
+00BF 0200C2            146             jmp     her_init
+                       147     her_init:
+00C2 7A32              148             mov     R2, #50
+                       149     her:
+00C4 1A                150             dec     R2
+00C5 114A              151             call    shift_left
+00C7 111B              152             call    sleep_50us
+00C9 DAF9              153             djnz    R2, her
+00CB 80E9              154             jmp     hin_init
+                       155
+                       156     while:
+00CD 00                157             nop
+                       158     ;       jmp     while
+                       159
+                       160             end
 ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
 
 
@@ -255,20 +235,19 @@ EX0. . . . . . . . . . . . . . . . .  B  ADDR  00A8H  NOT USED
 EX1. . . . . . . . . . . . . . . . .  B  ADDR  00AAH  NOT USED
 EXEN2. . . . . . . . . . . . . . . .  B  ADDR  00CBH  NOT USED
 EXF2 . . . . . . . . . . . . . . . .  B  ADDR  00CEH  NOT USED
-EXIT . . . . . . . . . . . . . . . .  C  ADDR  003FH
 EXTI0. . . . . . . . . . . . . . . .  C  ADDR  0003H  NOT USED
 EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H  NOT USED
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
-HER. . . . . . . . . . . . . . . . .  C  ADDR  00E0H
-HER_INIT . . . . . . . . . . . . . .  C  ADDR  00DEH
-HIN. . . . . . . . . . . . . . . . .  C  ADDR  00D4H
-HIN_INIT . . . . . . . . . . . . . .  C  ADDR  00D2H
+HER. . . . . . . . . . . . . . . . .  C  ADDR  00C4H
+HER_INIT . . . . . . . . . . . . . .  C  ADDR  00C2H
+HIN. . . . . . . . . . . . . . . . .  C  ADDR  00B8H
+HIN_INIT . . . . . . . . . . . . . .  C  ADDR  00B6H
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
-INIT . . . . . . . . . . . . . . . .  C  ADDR  006AH
-INIT2. . . . . . . . . . . . . . . .  C  ADDR  007BH  NOT USED
+INIT . . . . . . . . . . . . . . . .  C  ADDR  0056H
+INIT2. . . . . . . . . . . . . . . .  C  ADDR  0067H  NOT USED
 INT0 . . . . . . . . . . . . . . . .  B  ADDR  00B2H  NOT USED
 INT1 . . . . . . . . . . . . . . . .  B  ADDR  00B3H  NOT USED
 IP . . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
@@ -282,13 +261,12 @@ IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-LCD_CLEAR. . . . . . . . . . . . . .  C  ADDR  0052H
-LCD_CMD. . . . . . . . . . . . . . .  C  ADDR  0049H
-LCD_DATA . . . . . . . . . . . . . .  C  ADDR  0040H
-LCD_ENABLE . . . . . . . . . . . . .  C  ADDR  0015H
-LCD_RESET_CURSOR . . . . . . . . . .  C  ADDR  0058H
-LCD_STRING . . . . . . . . . . . . .  C  ADDR  0036H
-MAIN . . . . . . . . . . . . . . . .  C  ADDR  008AH  NOT USED
+LCD_CLEAR. . . . . . . . . . . . . .  C  ADDR  003EH
+LCD_CMD. . . . . . . . . . . . . . .  C  ADDR  0035H
+LCD_DATA . . . . . . . . . . . . . .  C  ADDR  002CH
+LCD_ENABLE . . . . . . . . . . . . .  C  ADDR  000BH
+LCD_RESET_CURSOR . . . . . . . . . .  C  ADDR  0044H
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  0076H  NOT USED
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -341,11 +319,11 @@ SADEN_0. . . . . . . . . . . . . . .  D  ADDR  00B9H  NOT USED
 SADEN_1. . . . . . . . . . . . . . .  D  ADDR  00BAH  NOT USED
 SBUF . . . . . . . . . . . . . . . .  D  ADDR  0099H  NOT USED
 SCON . . . . . . . . . . . . . . . .  D  ADDR  0098H  NOT USED
-SHIFT_LEFT . . . . . . . . . . . . .  C  ADDR  005EH
-SHIFT_RIGHT. . . . . . . . . . . . .  C  ADDR  0064H
+SHIFT_LEFT . . . . . . . . . . . . .  C  ADDR  004AH
+SHIFT_RIGHT. . . . . . . . . . . . .  C  ADDR  0050H
 SINT . . . . . . . . . . . . . . . .  C  ADDR  0023H  NOT USED
-SLEEP_50US . . . . . . . . . . . . .  C  ADDR  0025H
-SLEEP_5MS. . . . . . . . . . . . . .  C  ADDR  002BH
+SLEEP_50US . . . . . . . . . . . . .  C  ADDR  001BH
+SLEEP_5MS. . . . . . . . . . . . . .  C  ADDR  0021H
 SM0. . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 SM1. . . . . . . . . . . . . . . . .  B  ADDR  009EH  NOT USED
 SM2. . . . . . . . . . . . . . . . .  B  ADDR  009DH  NOT USED
@@ -356,7 +334,6 @@ SPDAT. . . . . . . . . . . . . . . .  D  ADDR  00C5H  NOT USED
 SPDR . . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 SPSR . . . . . . . . . . . . . . . .  D  ADDR  00AAH  NOT USED
 SPSTA. . . . . . . . . . . . . . . .  D  ADDR  00C4H  NOT USED
-STRING . . . . . . . . . . . . . . .  C  ADDR  000BH
 T0 . . . . . . . . . . . . . . . . .  B  ADDR  00B4H  NOT USED
 T1 . . . . . . . . . . . . . . . . .  B  ADDR  00B5H  NOT USED
 T2CON. . . . . . . . . . . . . . . .  D  ADDR  00C8H  NOT USED
@@ -385,5 +362,5 @@ TXD. . . . . . . . . . . . . . . . .  B  ADDR  00B1H  NOT USED
 WDTCON . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTPRG . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTRST . . . . . . . . . . . . . . .  D  ADDR  00A6H  NOT USED
-WHILE. . . . . . . . . . . . . . . .  C  ADDR  00E9H  NOT USED
+WHILE. . . . . . . . . . . . . . . .  C  ADDR  00CDH  NOT USED
 WR . . . . . . . . . . . . . . . . .  B  ADDR  00B6H  NOT USED

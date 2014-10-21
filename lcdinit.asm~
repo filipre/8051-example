@@ -12,9 +12,6 @@ D	equ	P2
 	jmp	init
 	;jmp	main
 ;--------------------------
-string:
-db 23,24,25,26,27,28,29,30,31,32
-;--------------------------
 lcd_enable:
 	nop
 	setb	E
@@ -38,16 +35,6 @@ sleep_5ms:
 	djnz	R1, $-5
 	nop
 	ret
-
-LCD_string:
-         clr   a                 ;clear Accumulator for any previous data
-         movc  a,@a+dptr         ;load the first character in accumulator
-         jz    exit              ;go to exit if zero
-         acall lcd_data      ;send first char
-         inc   dptr              ;increment data pointer
-         sjmp  lcd_string    ;jump back to send the next character
-exit:
-         ret                     ;End of routine
 
 lcd_data:
 	clr	RW
@@ -108,13 +95,7 @@ init2:
 main:
 
 	call lcd_clear
-	call lcd_reset_cursor
-
-	mov   dptr,#string  ;my_string is the label where the string is stored
- 	call lcd_string    ;Send string
-	jmp hin_init
-
-	
+	call lcd_reset_cursor	
 		
 ;	mov	D, #10000000b   ;Set Address of first Cell
 ;	call	lcd_cmd
